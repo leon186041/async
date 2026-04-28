@@ -84,14 +84,13 @@ function renderOrganization(orgInfo, template, container) {
                 orgInfo.buhForms[orgInfo.buhForms.length - 1].form2[0]
                     .endValue) ||
                 0
-        // Ошибка уже показана через alert, просто логируем
-        console.error("Ошибка в run:", e);
+        );
     } else {
         money.textContent = "—";
     }
 
     const addressFromServer = orgInfo.UL.legalAddress.parsedAddressRF;
-    address.textContent = createAddress(addressFromServer);
+    address.textContent = createAddress(addressFromServer);3
 
     container.appendChild(clone);
 }
