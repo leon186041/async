@@ -25,18 +25,6 @@ async function run() {
 run();
 
 function sendRequest(url, callback) {
-    if (typeof callback === "function") {
-        const xhr = new XMLHttpRequest();
-        xhr.open("GET", url, true);
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState === XMLHttpRequest.DONE) {
-                if (xhr.status === 200) {
-                    callback(JSON.parse(xhr.response));
-                }
-            }
-        };
-        xhr.send();
-    } else {
         return new Promise((resolve, reject) => {
             const xhr = new XMLHttpRequest();
             xhr.open("GET", url, true);
@@ -54,7 +42,6 @@ function sendRequest(url, callback) {
             };
             xhr.send();
         });
-    }
 }
 
 function reqsToMap(requisites) {
