@@ -12,7 +12,7 @@ async function run() {
         const ogrns = orgOgrns.join(",");
         const requisites = await sendRequest(`${API.orgReqs}?ogrn=${ogrns}`);
         const orgsMap = reqsToMap(requisites);
-        const analytics = await sendRequest(`${API.analytics}?ogrn=${ogrns}`);
+        const analytics = await sendRequest(`/api3/analitics?ogrn=${ogrns}`);
         addInOrgsMap(orgsMap, analytics, "analytics");
         const buh = await sendRequest(`${API.buhForms}?ogrn=${ogrns}`);
         addInOrgsMap(orgsMap, buh, "buhForms");
@@ -28,7 +28,8 @@ function sendRequest(url) {
     return fetch(url)
         .then((response) => {
             if (!response.ok) {
-                throw new Error(response.statusText || response.status);
+                alert(`Ошибка запроса: ${response.status} ${response.statusText}`);
+                throw new Error(`HTTP ${response.status} ${response.statusText}`);
             }
             return response.json();
         });
@@ -83,7 +84,8 @@ function renderOrganization(orgInfo, template, container) {
                 orgInfo.buhForms[orgInfo.buhForms.length - 1].form2[0]
                     .endValue) ||
                 0
-        );
+        // Ошибка уже показана через alert, просто логируем
+        console.error("Ошибка в run:", e);
     } else {
         money.textContent = "—";
     }
