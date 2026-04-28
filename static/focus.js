@@ -5,44 +5,55 @@ const API = {
     buhForms: "/api3/buh",
 };
 
-
-async function run() {
-    try {
-        const orgOgrns = await sendRequest(API.organizationList);
+function run() {
+    sendRequest(API.organizationList, (orgOgrns) => {
         const ogrns = orgOgrns.join(",");
-        const requisites = await sendRequest(`${API.orgReqs}?ogrn=${ogrns}`);
-        const orgsMap = reqsToMap(requisites);
-        const analytics = await sendRequest(`${API.analytics}?ogrn=${ogrns}`);
-        addInOrgsMap(orgsMap, analytics, "analytics");
-        const buh = await sendRequest(`${API.buhForms}?ogrn=${ogrns}`);
-        addInOrgsMap(orgsMap, buh, "buhForms");
-        render(orgsMap, orgOgrns);
-    } catch (e) {
-        console.error("Ошибка в run:", e);
-    }
+        sendRequest(`${API.orgReqs}?ogrn=${ogrns}`, (requisites) => {
+            const orgsMap = reqsToMap(requisites);
+            sendRequest(`${API.analytics}?ogrn=${ogrns}`, (analytics) => {
+                addInOrgsMap(orgsMap, analytics, "analytics");
+                sendRequest(`${API.buhForms}?ogrn=${ogrns}`, (buh) => {
+                    addInOrgsMap(orgsMap, buh, "buhForms");
+                    render(orgsMap, orgOgrns);
+                });
+            });
+        });
+    });
 }
 
 run();
 
-
-function sendRequest(url) {
-    return new Promise((resolve, reject) => {
+function sendRequest(url, callback) {
+    if (typeof callback === "function") {
         const xhr = new XMLHttpRequest();
         xhr.open("GET", url, true);
         xhr.onreadystatechange = function () {
             if (xhr.readyState === XMLHttpRequest.DONE) {
                 if (xhr.status === 200) {
-                    resolve(JSON.parse(xhr.response));
-                } else {
-                    reject(xhr.statusText || xhr.status);
+                    callback(JSON.parse(xhr.response));
                 }
             }
         };
-        xhr.onerror = function () {
-            reject("Network error");
-        };
         xhr.send();
-    });
+    } else {
+        return new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open("GET", url, true);
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    if (xhr.status === 200) {
+                        resolve(JSON.parse(xhr.response));
+                    } else {
+                        reject(xhr.statusText || xhr.status);
+                    }
+                }
+            };
+            xhr.onerror = function () {
+                reject("Network error");
+            };
+            xhr.send();
+        });
+    }
 }
 
 function reqsToMap(requisites) {
